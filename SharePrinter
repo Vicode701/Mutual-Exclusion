@@ -1,0 +1,53 @@
+package shareprinter;
+
+/**
+ *
+ * @author ViiCODE
+ */
+import java.util.concurrent.Semaphore;
+//A semaphore is used to control access to a resource by multiple processes
+public class SharePrinter {
+     // maximum process to use the resource (printer) at a time
+	static Semaphore semaphore = new Semaphore(1);
+	static class Process extends Thread {
+		String name = "";
+		Process(String name) {
+			this.name = name;
+		}
+                
+                //Critical section of the program
+		public void run() {
+			try {
+				System.out.println(name + " : Requesting to write to printer...");
+
+				semaphore.acquire();
+				System.out.println(name + " : Request accepted!");
+				try {
+					for (int i = 1; i <= 3; i++) {
+						System.out.println(name + " : Writing document " + i
+								+ ", Printer in use ");
+						// sleep 1 second
+						Thread.sleep(1000);
+					}
+				} finally {
+					// calling release() after a successful acquire()
+					System.out.println(name + " : Finished writing to printer. Releasing printer");
+					System.out.println(name + " : Printer open ");
+                                        semaphore.release();
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	public static void main(String[] args) {
+                //initial status of printer
+		System.out.println("Printer open ");
+                //Number of processes to use the printer
+		Process p1 = new Process("A");
+		p1.start();
+
+		Process p2 = new Process("B");
+		p2.start();
+	}
+}
